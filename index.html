@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Python File Handling & Errors: Live Demo</title>
+<style>
+:root{--bg:#f6f8fb;--card:#fff;--fg:#14213d;--mut:#5b6679;--bd:#d6dde8;--blue:#2563eb;--purple:#7c3aed;--ok:#15803d;--err:#b91c1c;--term:#0f172a;--termfg:#e2e8f0;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#0b1020;--card:#131a2e;--fg:#e6ebf5;--mut:#9aa6bd;--bd:#27314a;--blue:#60a5fa;--purple:#a78bfa;--ok:#4ade80;--err:#f87171;--term:#060a16;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+header{max-width:1040px;margin:0 auto;padding:28px 20px 8px}
+h1{margin:0 0 6px;font:700 clamp(1.5rem,4vw,2.1rem)/1.2 Georgia,"Times New Roman",serif}
+header p{margin:0;color:var(--mut);max-width:62ch}
+header a{color:var(--blue)}
+main{max-width:1040px;margin:0 auto;padding:16px 20px 40px}
+[role=tablist]{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+[role=tab]{padding:9px 16px;border:1px solid var(--bd);background:var(--card);color:var(--fg);border-radius:999px;font:600 .95rem inherit;font-family:inherit;cursor:pointer}
+[role=tab][aria-selected=true]{background:var(--blue);border-color:var(--blue);color:#fff}
+#tab-att[aria-selected=true]{background:var(--purple);border-color:var(--purple)}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:16px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:18px}
+.panel h2{margin:0 0 4px;font-size:1.1rem}
+.panel .sub{margin:0 0 14px;color:var(--mut);font-size:.9rem}
+label{display:block;font-weight:600;font-size:.9rem;margin:10px 0 4px}
+input,textarea{width:100%;padding:9px 10px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--fg);font:inherit}
+textarea{min-height:230px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9rem}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+button.act{padding:9px 14px;border-radius:6px;border:1px solid var(--bd);background:var(--card);color:var(--fg);font:600 .9rem inherit;font-family:inherit;cursor:pointer}
+button.main{background:var(--blue);border-color:var(--blue);color:#fff}
+.att button.main{background:var(--purple);border-color:var(--purple)}
+button.act:hover{filter:brightness(1.08)}
+.term{background:var(--term);color:var(--termfg);border-radius:10px;padding:0;display:flex;flex-direction:column;min-height:340px;overflow:hidden}
+.term .bar{padding:8px 14px;border-bottom:1px solid #1e293b;font-size:.8rem;color:#94a3b8;font-family:ui-monospace,Menlo,Consolas,monospace}
+.term pre{margin:0;padding:14px;flex:1;overflow:auto;max-height:460px;font:.85rem/1.5 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap}
+.e{color:#fca5a5}.s{color:#86efac}.h{color:#93c5fd}
+[hidden]{display:none!important}
+footer{max-width:1040px;margin:0 auto;padding:0 20px 36px;color:var(--mut);font-size:.88rem}
+</style>
+</head>
+<body>
+<header>
+  <h1>Python File Handling & Errors: Live Demo</h1>
+  <p>Try both programs in your browser. This page repeats the Python logic and messages exactly; the real programs read and write files on your computer.
+  <a href="https://github.com/Syedamaheen05/python-files-errors-assessment">View the source on GitHub</a>.</p>
+</header>
+<main>
+  <div role="tablist" aria-label="Choose a program">
+    <button role="tab" id="tab-exp" aria-selected="true" aria-controls="exp">Expense Tracker</button>
+    <button role="tab" id="tab-att" aria-selected="false" aria-controls="att">Attendance Cleaner</button>
+  </div>
+
+  <section id="exp" class="grid" role="tabpanel" aria-labelledby="tab-exp">
+    <div class="panel">
+      <h2>Add an expense</h2>
+      <p class="sub">Saved in this browser, like <code>expenses.csv</code> is saved on disk.</p>
+      <form id="expForm" novalidate>
+        <label for="date">Expense date (YYYY-MM-DD)</label><input id="date" autocomplete="off" placeholder="2026-11-14">
+        <label for="item">Item name</label><input id="item" autocomplete="off" placeholder="Internet Bill">
+        <label for="cat">Expense category</label><input id="cat" autocomplete="off" placeholder="Utilities">
+        <label for="amt">Expense amount</label><input id="amt" autocomplete="off" inputmode="decimal" placeholder="2500">
+        <div class="row">
+          <button class="act main" type="submit">Add expense</button>
+          <button class="act" type="button" id="showAll">Show all expenses</button>
+          <button class="act" type="button" id="showTot">Totals by category</button>
+          <button class="act" type="button" id="clearExp">Clear saved data</button>
+        </div>
+      </form>
+    </div>
+    <div class="term"><div class="bar">expense_tracker.py</div><pre id="expOut" aria-live="polite"></pre></div>
+  </section>
+
+  <section id="att" class="grid att" role="tabpanel" aria-labelledby="tab-att" hidden>
+    <div class="panel">
+      <h2>Raw attendance records</h2>
+      <p class="sub">One name per line, like <code>attendance.txt</code>.</p>
+      <label for="names">attendance.txt</label>
+      <textarea id="names" spellcheck="false"></textarea>
+      <div class="row">
+        <button class="act main" id="clean">Clean attendance</button>
+        <button class="act" id="dl" disabled>Download attendance_clean.csv</button>
+        <button class="act" id="reset">Reset sample</button>
+      </div>
+    </div>
+    <div class="term"><div class="bar">attendance_cleaner.py</div><pre id="attOut" aria-live="polite"></pre></div>
+  </section>
+</main>
+<footer>Author: Syyeda Maheen Bukhari (<a href="https://github.com/Syedamaheen05">@Syedamaheen05</a>)</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+function put(pre, text, cls){ const s=document.createElement("span"); if(cls) s.className=cls; s.textContent=text+"\n"; pre.appendChild(s); pre.scrollTop=pre.scrollHeight; }
+
+/* ---- tabs ---- */
+const tabs=[["tab-exp","exp"],["tab-att","att"]];
+tabs.forEach(([t,p])=>$(t).onclick=()=>tabs.forEach(([t2,p2])=>{$(t2).setAttribute("aria-selected",t2===t);$(p2).hidden=p2!==p;}));
+
+/* ---- Expense Tracker (mirrors expense_tracker.py) ---- */
+const KEY="expenses-demo", out=$("expOut");
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY))||[]; }catch(e){ return []; } }  // missing data -> empty list
+function save(list){ try{ localStorage.setItem(KEY,JSON.stringify(list)); return true; }catch(e){ return false; } }
+function validDate(v){ const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(v); if(!m) return false; const d=new Date(+m[1],m[2]-1,+m[3]); return d.getFullYear()==m[1]&&d.getMonth()==m[2]-1&&d.getDate()==+m[3]; }
+let expenses = load();
+put(out, expenses.length ? `Loaded ${expenses.length} saved expense(s).` : "No saved expenses found. Starting with an empty list.", "h");
+
+$("expForm").onsubmit = ev => {
+  ev.preventDefault();
+  const date=$("date").value.trim(), item=$("item").value.trim(), catRaw=$("cat").value.trim(), amtRaw=$("amt").value.trim();
+  put(out,"\n--- Add New Expense ---\n","h");
+  if(!validDate(date)) return put(out,"Invalid date! Use the format YYYY-MM-DD.","e");
+  if(!item) return put(out,"This field cannot be empty. (item name)","e");
+  if(!catRaw) return put(out,"This field cannot be empty. (category)","e");
+  const amount = amtRaw==="" ? NaN : Number(amtRaw);
+  if(!Number.isFinite(amount)) return put(out,"Invalid amount! Please enter a valid number.","e");
+  if(amount<=0) return put(out,"Amount must be greater than zero.","e");
+  const category = catRaw.toLowerCase().replace(/(^|[^\p{L}])(\p{L})/gu,(m,a,b)=>a+b.toUpperCase()); // Python title()
+  expenses.push({date,item,category,amount});
+  put(out, save(expenses) ? "Expense added and saved successfully!" : "Expense added (browser storage is blocked, so it will not persist).", "s");
+  ["item","cat","amt"].forEach(i=>$(i).value=""); $("item").focus();
+};
+$("showAll").onclick = () => {
+  put(out,"\n--- All Expenses ---\n","h");
+  if(!expenses.length) return put(out,"No expenses available.");
+  expenses.forEach(e=>put(out,`Date: ${e.date} | Item: ${e.item} | Category: ${e.category} | Amount: Rs. ${e.amount.toFixed(2)}`));
+};
+$("showTot").onclick = () => {
+  put(out,"\n--- Expenses by Category ---\n","h");
+  if(!expenses.length) return put(out,"No expenses available.");
+  const cats=[...new Set(expenses.map(e=>e.category))].sort();           // set of unique categories
+  put(out,"Unique Categories: "+cats.join(", ")+"\n");
+  cats.forEach(c=>put(out,`${c}: Rs. ${expenses.filter(e=>e.category===c).reduce((t,e)=>t+e.amount,0).toFixed(2)}`));
+};
+$("clearExp").onclick = () => { expenses=[]; save(expenses); out.textContent=""; put(out,"Saved data cleared. Starting with an empty list.","h"); };
+
+/* ---- Attendance Cleaner (mirrors attendance_cleaner.py) ---- */
+const SAMPLE="maheen bukhari\n  ali raza\nMAHEEN BUKHARI\nfatima   noor\nali raza\n  Fatima Noor\nHassan Ahmed\nhassan ahmed\n  Ayesha Khan\nAYESHA KHAN\n";
+const names=$("names"), aOut=$("attOut"); let csv="";
+names.value=SAMPLE;
+const title = s => s.toLowerCase().replace(/(^|[^\p{L}])(\p{L})/gu,(m,a,b)=>a+b.toUpperCase());
+$("clean").onclick = () => {
+  aOut.textContent="";
+  const cleaned = names.value.split("\n").filter(n=>n.trim()).map(n=>title(n.trim().split(/\s+/).join(" "))); // list comprehension
+  const unique = [...new Set(cleaned)].sort();                                                              // set + sorted
+  csv = "Student Name\r\n"+unique.map(n=>n+"\r\n").join("");
+  put(aOut,"--- Attendance Cleaning Report ---\n","h");
+  put(aOut,`Original Records: ${cleaned.length}`); put(aOut,`Unique Students: ${unique.length}`);
+  put(aOut,"\n--- Cleaned Attendance List ---\n","h");
+  unique.forEach(n=>put(aOut,n));
+  put(aOut,"\nCleaned attendance saved to attendance_clean.csv (use the download button).","s");
+  $("dl").disabled=false;
+};
+$("dl").onclick = () => { const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"})); a.download="attendance_clean.csv"; a.click(); URL.revokeObjectURL(a.href); };
+$("reset").onclick = () => { names.value=SAMPLE; aOut.textContent=""; $("dl").disabled=true; };
+put(aOut,"Press “Clean attendance” to process the records on the left.","h");
+</script>
+</body>
+</html>

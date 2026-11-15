@@ -1,0 +1,23 @@
+  
+  Row Data: 
+      
+maheen bukhari
+  ali raza
+MAHEEN BUKHARI
+fatima   noor
+ali raza
+  Fatima Noor
+Hassan Ahmed
+hassan ahmed
+  Ayesha Khan
+AYESHA KHAN
+
+
+ After running attendance_cleaner.py,
+
+Ali Raza
+Ayesha Khan
+Fatima Noor
+Hassan Ahmed
+Maheen Bukhari
+
